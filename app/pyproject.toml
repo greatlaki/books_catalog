@@ -1,0 +1,51 @@
+[tool.poetry]
+name = "app"
+version = "0.1.0"
+description = ""
+authors = ["greatlaki <greatlaki911@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.11.4"
+pydantic-settings = "^2.3.1"
+asyncpg = "^0.29.0"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.30"}
+alembic = "^1.13.1"
+uvicorn = "^0.30.1"
+black = "^24.4.2"
+isort = "^5.13.2"
+ruff = "^0.4.8"
+mypy = "^1.10.0"
+fastapi = "^0.111.0"
+passlib = "^1.7.4"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.7.1"
+
+[tool.black]
+skip-string-normalization = true
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.ruff]
+lint.select = ["B","C","E","F","W","T"]
+lint.ignore = ["UP004", "D100", "D101", "D102", "D103", "D104", "D107", "D400", "D415"]
+line-length = 120
+target-version = "py311"
+exclude = [
+    ".git",
+    "*/migrations/*",
+    ".venv",
+    "__init__.py"
+]
+
+[tool.ruff.format]
+quote-style = "single"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
