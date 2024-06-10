@@ -8,4 +8,4 @@ class Genre(Base):
 
     genre: Mapped[str] = mapped_column(nullable=False, unique=True)
 
-    books: Mapped[list['Book']] = relationship(secondary='m2m_subjects_categories', back_populates='genres')
+    books: Mapped[list['Book']] = relationship(secondary='m2m_books_genres', back_populates='genres')

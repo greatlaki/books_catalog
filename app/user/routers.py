@@ -3,14 +3,14 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, status
 
 from base.utils import get_hashed_password
-from main.depends import CurrentActiveUserDep
 from pg.repositories.user_repository import UserRepository
 from user.schemas import UserCreateSchema, UserReadSchema, UserUpdate
 
+auth_router = APIRouter()
 user_router = APIRouter()
 
 
-@user_router.post(
+@auth_router.post(
     '/register',
     response_model=UserReadSchema,
     status_code=status.HTTP_201_CREATED,
@@ -32,19 +32,8 @@ async def register(user: UserCreateSchema) -> dict[str, Any]:
         return {'id': new_user.id, 'email': new_user.email}
 
 
-@user_router.post(
-    '/login',
-    status_code=status.HTTP_200_OK,
-)
-async def login(user: CurrentActiveUserDep) -> dict[str, Any]:
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid username or password')
-
-    return {'id': user.id, 'user_email': user.email}
-
-
 @user_router.get('/{user_id}', response_model=UserReadSchema, status_code=status.HTTP_200_OK)
-async def get_profile(user_id: int, user: CurrentActiveUserDep):
+async def get_profile(user_id: int):
     async with UserRepository() as repository:
         target_user = await repository.find_one(id=user_id)
 
@@ -61,7 +50,7 @@ async def get_profile(user_id: int, user: CurrentActiveUserDep):
 
 
 @user_router.patch('/{user_id}', response_model=UserReadSchema, status_code=status.HTTP_200_OK)
-async def update_profile(user_id: int, data: UserUpdate, user: CurrentActiveUserDep) -> dict[str, Any]:
+async def update_profile(user_id: int, data: UserUpdate) -> dict[str, Any]:
     async with UserRepository() as repository:
         user = await repository.edit_one(pk=user_id, **data.model_dump(exclude_none=True))
     return {
@@ -74,7 +63,7 @@ async def update_profile(user_id: int, data: UserUpdate, user: CurrentActiveUser
 
 
 @user_router.delete('/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
-async def update_profile(user_id: int, user: CurrentActiveUserDep):
+async def delete_profile(user_id: int):
     async with UserRepository() as repository:
         await repository.delete_one(pk=user_id)
     return {'status': True}

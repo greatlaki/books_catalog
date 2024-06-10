@@ -18,7 +18,3 @@ class UserRepository(PgRepository):
     async def update_user(self, values: dict[str, Any]):
         update_stmt = update(self.model).values(**values)
         await self.session.execute(update_stmt)
-
-    async def foo(self, values: list[dict[str, str]]):
-        res = await self.session.execute(insert(self.model).returning(self.model), values)
-        print(res.scalars())

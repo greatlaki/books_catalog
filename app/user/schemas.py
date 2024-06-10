@@ -8,9 +8,9 @@ class UserCreateSchema(BaseModel):
 
 class UserReadSchema(BaseModel):
     email: EmailStr
-    first_name: str
-    last_name: str
-    avatar: str
+    first_name: str | None = None
+    last_name: str | None = None
+    avatar: str | None = None
 
 
 class UserUpdate(BaseModel):

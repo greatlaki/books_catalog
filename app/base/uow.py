@@ -27,6 +27,7 @@ class UnitOfWork(object):
 
     async def aexit(self, exc_type: type[TExc] | None, exc: TExc | None, traceback: Any | None):
         if exc_type is not None:
+            logger.exception(f'error during executing query: {exc_type}: {exc}')
             raise exc
 
 
