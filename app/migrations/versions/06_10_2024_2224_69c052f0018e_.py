@@ -1,8 +1,8 @@
 """
 
-Revision ID: 7ecbf63d1880
+Revision ID: 69c052f0018e
 Revises: 
-Create Date: 2024-06-09 20:58:54.586300
+Create Date: 2024-06-10 22:24:02.974119
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '7ecbf63d1880'
+revision: str = '69c052f0018e'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -46,6 +46,7 @@ def upgrade() -> None:
         'books',
         sa.Column('name', sa.String(length=320), nullable=False),
         sa.Column('price', sa.DECIMAL(precision=10, scale=2), nullable=False),
+        sa.Column('page_count', sa.Integer(), nullable=False),
         sa.Column('author_id', sa.Integer(), nullable=False),
         sa.Column('genre_id', sa.Integer(), nullable=False),
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
