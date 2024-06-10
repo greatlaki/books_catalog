@@ -16,9 +16,7 @@ book_router = APIRouter()
     status_code=status.HTTP_201_CREATED,
 )
 async def add_books(book: BookCreateSchema) -> dict[str, Any]:
-    EntityRepository.model = Book
-
-    async with EntityRepository() as repository:
+    async with EntityRepository(Book) as repository:
         existing_book = await repository.find_one(name=book.name, author_id=book.author_id)
         if existing_book:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Book already exists')
@@ -58,9 +56,7 @@ async def get_books():
 
 @book_router.patch('/{book_id}', status_code=status.HTTP_200_OK)
 async def update_book(book_id: int, data: BookCreateSchema) -> dict[str, Any]:
-    EntityRepository.model = Book
-
-    async with EntityRepository() as repository:
+    async with EntityRepository(Book) as repository:
         book = await repository.edit_one(pk=book_id, **data.model_dump(exclude_none=True))
 
     return {
@@ -75,8 +71,6 @@ async def update_book(book_id: int, data: BookCreateSchema) -> dict[str, Any]:
 
 @book_router.delete('/{book_id}', status_code=status.HTTP_200_OK)
 async def delete_book(book_id: int):
-    EntityRepository.model = Book
-
-    async with EntityRepository() as repository:
+    async with EntityRepository(Book) as repository:
         await repository.delete_one(pk=book_id)
     return {'status': True}

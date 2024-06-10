@@ -5,7 +5,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from base.utils import verify_and_update
-from pg.repositories.user_repository import User, UserRepository
+from pg.repositories.entity_repository import EntityRepository
+from pg.repositories.user_repository import User
 
 security = HTTPBasic()
 
@@ -16,7 +17,7 @@ class DatabaseUser:
     async def current_user_dependency(
         self, credentials: Annotated[HTTPBasicCredentials, Depends(security)]
     ) -> User | None:
-        async with UserRepository() as repository:
+        async with EntityRepository(User) as repository:
             user = await repository.find_one(email=credentials.username)
 
             if user is None:
@@ -27,7 +28,7 @@ class DatabaseUser:
                 return None
 
             if updated_password_hash is not None:
-                await repository.update_user({'hashed_password': updated_password_hash})
+                await repository.edit_one(pk=user.id, **{'hashed_password': updated_password_hash})
 
         return user
 

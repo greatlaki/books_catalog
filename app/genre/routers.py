@@ -16,9 +16,7 @@ genre_router = APIRouter()
     status_code=status.HTTP_201_CREATED,
 )
 async def add_genres(genre: GenreCreateSchema) -> dict[str, Any]:
-    EntityRepository.model = Genre
-
-    async with EntityRepository() as repository:
+    async with EntityRepository(Genre) as repository:
         existing_genre = await repository.find_one(genre=genre.genre)
 
         if existing_genre is not None:
@@ -39,9 +37,7 @@ async def get_genres():
 
 @genre_router.patch('/{genre_id}', status_code=status.HTTP_200_OK)
 async def update_genre(genre_id: int, data: GenreCreateSchema) -> dict[str, Any]:
-    EntityRepository.model = Genre
-
-    async with EntityRepository() as repository:
+    async with EntityRepository(Genre) as repository:
         genre = await repository.edit_one(pk=genre_id, **data.model_dump())
 
     return {
@@ -52,8 +48,6 @@ async def update_genre(genre_id: int, data: GenreCreateSchema) -> dict[str, Any]
 
 @genre_router.delete('/{genre_id}', status_code=status.HTTP_200_OK)
 async def delete_genre(genre_id: int):
-    EntityRepository.model = Genre
-
-    async with EntityRepository() as repository:
+    async with EntityRepository(Genre) as repository:
         await repository.delete_one(pk=genre_id)
     return {'status': True}
