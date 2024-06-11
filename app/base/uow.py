@@ -3,7 +3,6 @@ from typing import Any, Callable, TypeVar
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import engines
 
 TExc = TypeVar('TExc', bound=Exception)
 
@@ -70,6 +69,3 @@ class SessionUnitOfWork(UnitOfWork):
 
         await self.session.close()
         self.session = None
-
-
-conn_uow: SessionUnitOfWork = SessionUnitOfWork(engines.pg_async_engine)

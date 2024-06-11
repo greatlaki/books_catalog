@@ -1,9 +1,11 @@
+from decimal import Decimal
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, status
 
 from book.models import Book, M2MBookGenre
 from book.schemas import BookCreateSchema, BookSchema
+from database.uow import PgUow
 from pg.repositories.book_repository import BookRepository
 from pg.repositories.entity_repository import EntityRepository
 
@@ -16,15 +18,17 @@ book_router = APIRouter()
     status_code=status.HTTP_201_CREATED,
 )
 async def add_books(book: BookCreateSchema) -> dict[str, Any]:
-    async with EntityRepository(Book) as repository:
-        existing_book = await repository.find_one(name=book.name, author_id=book.author_id)
+    async with PgUow() as uow:
+        book_repo = EntityRepository(Book, uow)
+        m2m_repo = EntityRepository(M2MBookGenre, uow)
+
+        existing_book = await book_repo.find_one(name=book.name, author_id=book.author_id)
         if existing_book:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Book already exists')
 
-        new_book = await repository.add_entity(book.model_dump())
+        new_book = await book_repo.add_entity(book.model_dump())
 
-        EntityRepository.model = M2MBookGenre
-        await repository.add_entity({'book_id': new_book.id, 'genre_id': new_book.genre_id})
+        await m2m_repo.add_entity({'book_id': new_book.id, 'genre_id': new_book.genre_id})
 
         return {
             'id': new_book.id,
@@ -37,9 +41,19 @@ async def add_books(book: BookCreateSchema) -> dict[str, Any]:
 
 
 @book_router.get('/', response_model=list[BookSchema], status_code=status.HTTP_200_OK)
-async def get_books():
+async def get_books(
+    author: str | None = None,
+    genre: str | None = None,
+    price__lt: Decimal | None = None,
+    price__gte: Decimal | None = None,
+):
+    if author.isdigit() or genre.isdigit():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Author or genre should be a string')
+
+    filtering_by = {'author': author, 'genre': genre, 'price__lt': price__lt, 'price__gte': price__gte}
+
     async with BookRepository() as repository:
-        books = await repository.get_books()
+        books = await repository.get_books(filtering_by)
 
     return [
         {

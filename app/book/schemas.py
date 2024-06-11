@@ -18,3 +18,10 @@ class BookSchema(BaseModel):
     page_count: int
     author_id: int
     genre_id: int
+
+
+class BooksFiltering(BaseModel):
+    by_author: str | None = None
+    by_genre: str | None = None
+    price__lt: Decimal | None = None
+    price__gte: Decimal | None = None

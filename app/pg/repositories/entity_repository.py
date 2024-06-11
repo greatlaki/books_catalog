@@ -1,11 +1,11 @@
 from sqlalchemy.dialects.postgresql import insert
 
-from base.repository import PgRepository, TBase
+from base.repository import PgRepository, TBase, TUow
 
 
 class EntityRepository(PgRepository):
-    def __init__(self, model: type[TBase]):
-        super().__init__()
+    def __init__(self, model: type[TBase], uow: TUow | None = None):
+        super().__init__(uow)
         self.model = model
 
     async def add_entity(self, values: dict[str, str]):
