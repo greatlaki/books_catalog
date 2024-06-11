@@ -1,9 +1,10 @@
 from decimal import Decimal
 
-from sqlalchemy import text
+from sqlalchemy import select, text
+from sqlalchemy.orm import selectinload
 
 from base.repository import PgRepository
-from book.models import Book
+from pg.models import Book, User
 
 
 class BookRepository(PgRepository):
@@ -48,3 +49,14 @@ class BookRepository(PgRepository):
 
         books = await self.session.execute(text(stmt), params=filtering_data)
         return books.mappings().all()
+
+    async def get_book_to_reserve(self, book: str, author: str) -> Book | None:
+        stmt = (
+            select(self.model)
+            .join(User, User.id == self.model.author_id)
+            .where(self.model.name == book)
+            .where(User.first_name + ' ' + User.last_name == author)
+            .options(selectinload(self.model.author))
+        )
+        book = await self.session.execute(stmt)
+        return book.scalar_one_or_none()

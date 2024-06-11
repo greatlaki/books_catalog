@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from decimal import Decimal
 
 from pydantic import BaseModel
@@ -20,8 +21,8 @@ class BookSchema(BaseModel):
     genre_id: int
 
 
-class BooksFiltering(BaseModel):
-    by_author: str | None = None
-    by_genre: str | None = None
-    price__lt: Decimal | None = None
-    price__gte: Decimal | None = None
+class BooksReserve(BaseModel):
+    book: str
+    author: str
+    start_booking: date = date.today()
+    end_booking: date = date.today() + timedelta(days=30)
