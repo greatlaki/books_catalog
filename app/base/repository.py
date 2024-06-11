@@ -46,11 +46,6 @@ class CrudMixin(Generic[TBase]):
         res = await self.session.execute(stmt)
         return res.scalar_one_or_none()
 
-    async def find_all(self):
-        stmt = select(self.model)
-        res = await self.session.execute(stmt)
-        return res.scalars().all()
-
     async def edit_one(self, pk: int, **data: Any) -> TBase:
         stmt = update(self.model).values(**data).filter_by(id=pk).returning(self.model)
         res = await self.session.execute(stmt)
