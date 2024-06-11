@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.dialects.postgresql import insert
 
 from base.repository import PgRepository
@@ -9,6 +9,10 @@ from pg.models import Reserve
 
 class ReserveRepository(PgRepository):
     model = Reserve
+
+    async def cancel_books_reserve(self):
+        stmt = delete(self.model).where(self.model.due_date == date.today())
+        await self.session.execute(stmt)
 
     async def reserve_book(self, data: dict[str, int | datetime]):
         stmt = insert(self.model).returning(self.model)

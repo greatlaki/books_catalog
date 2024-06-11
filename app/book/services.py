@@ -22,9 +22,17 @@ async def check_booking_dates(target_book: Book | None, start_booking: date, end
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Dates cannot be in past')
 
     if start_booking + timedelta(days=30) < end_booking:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='You cannot book more then a month')
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='You cannot book more than a month')
 
     if start_booking > end_booking:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail='The end of the booking must be later than the beginning'
         )
+
+    if end_booking <= date.today() + timedelta(2):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='The reserve must be more than two days')
+
+
+async def cancel_reserve_background():
+    async with ReserveRepository() as repository:
+        await repository.cancel_books_reserve()
