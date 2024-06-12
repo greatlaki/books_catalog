@@ -1,0 +1,62 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: .
+    container_name: e-books-catalog
+    command: ["python", "run.py"]
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_USER=postgres_test
+      - POSTGRES_PASSWORD=postgres_test
+      - POSTGRES_DB=postgres_test
+    depends_on:
+      - db
+      - redis
+    networks:
+      - backend
+
+  db:
+    image: postgres:16-alpine
+    restart: always
+    ports:
+      - "6432:5432"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=postgres_test
+      - POSTGRES_PASSWORD=postgres_test
+      - POSTGRES_DB=postgres_test
+    networks:
+      - backend
+
+
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      - backend
+
+  worker:
+    build: .
+    command: celery -A tasks.tasks:celery worker --beat --loglevel=info
+    env_file:
+      - .env
+    networks:
+      - backend
+    environment:
+      - POSTGRES_USER=postgres_test
+      - POSTGRES_PASSWORD=postgres_test
+      - POSTGRES_DB=postgres_test
+    depends_on:
+      - redis
+      - db
+
+networks:
+  backend:
+    driver: bridge

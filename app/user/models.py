@@ -1,4 +1,5 @@
 from sqlalchemy import String
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from base.models import Base, Mapped, mapped_column
@@ -15,3 +16,7 @@ class User(Base):
     avatar: Mapped[str] = mapped_column(server_default='')
 
     books: Mapped[list[Book]] = relationship(back_populates='author')
+
+    @hybrid_property
+    def full_name(self):
+        return self.first_name + self.last_name

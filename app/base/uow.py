@@ -3,7 +3,6 @@ from typing import Any, Callable, TypeVar
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 TExc = TypeVar('TExc', bound=Exception)
 
 logger = logging.getLogger('app')

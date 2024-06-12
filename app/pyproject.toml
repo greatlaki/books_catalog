@@ -12,15 +12,19 @@ asyncpg = "^0.29.0"
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.30"}
 alembic = "^1.13.1"
 uvicorn = "^0.30.1"
+fastapi = "^0.111.0"
+passlib = "^1.7.4"
+celery = "^5.4.0"
+flower = "^2.0.1"
+redis = "^5.0.5"
+asgiref = "^3.8.1"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.7.1"
 black = "^24.4.2"
 isort = "^5.13.2"
 ruff = "^0.4.8"
 mypy = "^1.10.0"
-fastapi = "^0.111.0"
-passlib = "^1.7.4"
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^3.7.1"
 
 [tool.black]
 skip-string-normalization = true

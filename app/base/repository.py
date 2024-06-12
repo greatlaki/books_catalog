@@ -1,6 +1,7 @@
 from typing import Any, Generic, TypeVar
 
 from sqlalchemy import delete, select, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from base.models import Base
@@ -46,11 +47,6 @@ class CrudMixin(Generic[TBase]):
         res = await self.session.execute(stmt)
         return res.scalar_one_or_none()
 
-    async def find_all(self):
-        stmt = select(self.model)
-        res = await self.session.execute(stmt)
-        return res.scalars().all()
-
     async def edit_one(self, pk: int, **data: Any) -> TBase:
         stmt = update(self.model).values(**data).filter_by(id=pk).returning(self.model)
         res = await self.session.execute(stmt)
@@ -64,3 +60,7 @@ class CrudMixin(Generic[TBase]):
 class PgRepository(SaSessionRepository, CrudMixin[TBase]):
     model: type[TBase]
     DefaultUnitOfWork = PgUow
+
+    async def load_fixture_data(self, data: list[dict[str, Any]]):
+        stmt = insert(self.model).values(data).on_conflict_do_nothing()
+        await self.session.execute(stmt)

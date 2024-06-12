@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 from base.logging import LogConfig
 from main.routers import router
+from pg.fixture import DatabaseFixtures
 
 dictConfig(LogConfig().dict())
 logger = logging.getLogger('app')
@@ -14,7 +15,7 @@ logger = logging.getLogger('app')
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info('Started fastapi')
-
+    await DatabaseFixtures().run()
     yield
 
     logger.info('Stopped fastapi')
