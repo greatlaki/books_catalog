@@ -4,6 +4,7 @@ from sqlalchemy import select, text
 from sqlalchemy.orm import selectinload
 
 from base.repository import PgRepository
+from book.models import M2MBookGenre
 from pg.models import Book, User
 
 
@@ -60,3 +61,10 @@ class BookRepository(PgRepository):
         )
         book = await self.session.execute(stmt)
         return book.scalar_one_or_none()
+
+    async def cancel_books_reserve(self):
+        stmt = delete
+
+
+class M2MBookGenreRepository(PgRepository):
+    model = M2MBookGenre

@@ -4,84 +4,59 @@ services:
   app:
     build:
       context: .
-    container_name: e-wallet
-    command: |
-      sh -c '
-        python manage.py collectstatic --noinput
-        python manage.py migrate --noinput
-        python manage.py runserver 0.0.0.0:8000
-      '
+    container_name: e-books-catalog
+    command: ["python", "run.py"]
     restart: always
-    environment:
-      - POSTGRES_HOST=db
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DEBUG=${DEBUG}
-      - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+    env_file:
+      - .env
     ports:
       - "8000:8000"
+    environment:
+      - POSTGRES_USER=postgres_test
+      - POSTGRES_PASSWORD=postgres_test
+      - POSTGRES_DB=postgres_test
     depends_on:
       - db
+      - redis
+    networks:
+      - backend
 
   db:
-    image: postgres:13-alpine
+    image: postgres:16-alpine
     restart: always
-    volumes:
-      - postgres-data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    hostname: zookeeper
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - "22181:2181"
+      - "6432:5432"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=postgres_test
+      - POSTGRES_PASSWORD=postgres_test
+      - POSTGRES_DB=postgres_test
+    networks:
+      - backend
 
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    container_name: kafka
+
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      - backend
+
+  worker:
+    build: .
+    command: celery -A tasks.tasks:celery worker --beat --loglevel=info
+    env_file:
+      - .env
+    networks:
+      - backend
+    environment:
+      - POSTGRES_USER=postgres_test
+      - POSTGRES_PASSWORD=postgres_test
+      - POSTGRES_DB=postgres_test
     depends_on:
-      - zookeeper
-    ports:
-      - 29092:29092
-    hostname: kafka
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: SSL://kafka:29092, SASL_SSL_HOST://localhost:29092, SSL_HOST://localhost:29092
-      KAFKA_SSL_KEYSTORE_FILENAME: broker.keystore.jks
-      KAFKA_SSL_KEYSTORE_CREDENTIALS: cert_creds
-      KAFKA_SSL_KEY_CREDENTIALS: cert_creds
-      KAFKA_SSL_TRUSTSTORE_FILENAME: broker.truststore.jks
-      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: cert_creds
-      KAFKA_SSL_CLIENT_AUTH: 'required'
-      KAFKA_SECURITY_PROTOCOL: SSL
-      KAFKA_SECURITY_INTER_BROKER_PROTOCOL: SSL
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_ZOOKEEPER_SET_ACL: "true"
-    volumes:
-      - ./secrets:/etc/kafka/secrets
+      - redis
+      - db
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui
-    container_name: kafka-ui
-    ports:
-      - "8090:8080"
-    restart: always
-    environment:
-      - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
-      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
-    links:
-      - kafka
-
-volumes:
-  postgres-data:
+networks:
+  backend:
+    driver: bridge

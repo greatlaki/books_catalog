@@ -34,8 +34,7 @@ class AppSettings(BaseSettings):
 
     PREFIX: str = '/backend'
 
-    CELERY_BROKER_URL: str = 'redis://localhost6379'
-    CELERY_RESULT_BACKEND: str = 'redis://localhost6379'
+    CELERY_BROKER_URL: str = 'redis://redis:6379/0'
 
     PG: PostgresSettings = PostgresSettings()
 

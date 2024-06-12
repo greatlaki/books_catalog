@@ -17,6 +17,7 @@ passlib = "^1.7.4"
 celery = "^5.4.0"
 flower = "^2.0.1"
 redis = "^5.0.5"
+asgiref = "^3.8.1"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.1"

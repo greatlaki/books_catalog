@@ -1,6 +1,7 @@
 from typing import Any, Generic, TypeVar
 
 from sqlalchemy import delete, select, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from base.models import Base
@@ -59,3 +60,7 @@ class CrudMixin(Generic[TBase]):
 class PgRepository(SaSessionRepository, CrudMixin[TBase]):
     model: type[TBase]
     DefaultUnitOfWork = PgUow
+
+    async def load_fixture_data(self, data: list[dict[str, Any]]):
+        stmt = insert(self.model).values(data).on_conflict_do_nothing()
+        await self.session.execute(stmt)

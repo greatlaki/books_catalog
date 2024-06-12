@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import select, delete
+from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 
 from base.repository import PgRepository
